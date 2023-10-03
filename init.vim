@@ -34,7 +34,6 @@ call plug#begin('~/.vim/plugged')
     Plug 'alvan/vim-closetag'
     Plug 'pangloss/vim-javascript'
     Plug 'maxmellon/vim-jsx-pretty'
-    Plug 'ctrlpvim/ctrlp.vim'
     Plug 'junegunn/fzf'
     Plug 'junegunn/fzf.vim'
     Plug 'vim-ruby/vim-ruby'
@@ -57,11 +56,9 @@ call plug#begin('~/.vim/plugged')
 
     Plug 'nvim-tree/nvim-tree.lua'
 
-
-
-
-    
-    
+    Plug 'slim-template/vim-slim'
+    Plug 'chrisbra/vim-commentary'
+    Plug 'github/copilot.vim'
 
 call plug#end()
 
@@ -76,6 +73,9 @@ lua <<EOF
     require("nvim-tree").setup()
     vim.api.nvim_create_autocmd({ "VimEnter" }, { callback = open_nvim_tree })
 
+
+    vim.g.copilot_no_tab_map = true
+    vim.g.copilot_assume_mapped = true
 
   -- Set up nvim-cmp.
   local cmp = require'cmp'
@@ -96,8 +96,11 @@ lua <<EOF
       ['<C-f>'] = cmp.mapping.scroll_docs(4),
       ['<C-Space>'] = cmp.mapping.complete(),
       ['<C-e>'] = cmp.mapping.abort(),
-      ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+      ['<CR>'] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+      ["<Tab>"] = cmp.mapping(cmp.mapping.select_next_item(), { "i", "s" }),
+      ["<S-Tab>"] = cmp.mapping(cmp.mapping.select_prev_item(), { "i", "s" }),
     }),
+
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },
       { name = 'luasnip' }, -- For luasnip users.
@@ -145,8 +148,10 @@ require("lspconfig").solargraph.setup {
     capabilities = capabilities
 }
 
-
 EOF
+
+imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")
+let g:copilot_no_tab_map = v:true
 
 filetype plugin indent on
 
@@ -159,15 +164,21 @@ set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=%*
 let g:tex_flavor='latex'
 let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
+let g:syntastic_auto_loc_list = 0
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
 let g:syntastic_eruby_ruby_quiet_messages =
-    \ {'regex': 'possibly useless use of a variable in void context'}
+    \ {'regex': ['possibly useless use of a variable in void context', 'unexpected']}
 set laststatus=2
 
 " Close tag
 let g:closetag_filenames = ".html,.xhtml,*.phtml, *.html.erb"
+
+nnoremap <silent> <C-p> :GFiles<CR>
+nnoremap <silent> <C-s> :Buffers<CR>
+nnoremap <silent> <C-f> :Ag<CR>
+
+let g:ctrlp_max_files=0
 
 " color scheme of the moment:
 syntax on
